@@ -2,6 +2,8 @@
 
 Un script de automatización diseñado para corregir los fallos de renderizado (patrones de líneas verticales o corrupción de pantalla) en GPUs integradas Intel de legado (Testeado en Gen 2) bajo el servidor gráfico X11 y entornos ligeros (`bspwm`, `i3wm`).
 
+![Antes](https://github.com/NeTenebraes/Intel-Legacy-Buffer-Fix-Arch-Linux/blob/main/images/Antes.webp?raw=true).
+
 ## El Problema
 Las versiones modernas de la pila gráfica **Mesa** y el backend por defecto de **DRI3** sufren de desbordamientos de búfer de texturas al realizar operaciones rápidas de escalado o redibujado dinámico (como el zoom en terminales GPU-accelerated o renderizado de glifos complejos). Esto genera artefactos masivos de color en toda la pantalla (lineas verticales/horizontales).
 
@@ -56,5 +58,7 @@ El script detecta automatiza la transición mediante pacman:
 - **Reemplazo de la pila**: Al instalarlo, reemplaza la pila de Mesa moderna, asegurando que tu GPU vuelva a hablar en su "idioma nativo" a nivel de kernel.
 
 ## En resumen
+
+![Despues](https://github.com/NeTenebraes/Intel-Legacy-Buffer-Fix-Arch-Linux/blob/main/images/Despues.webp?raw=true)
 
 Al ejecutar el oneliner, resuelves el desborde matemático de la VRAM. El sistema operativo deja de exigirle a tu GPU Intel clásica funciones de renderizado modernas y la estabiliza en un modo óptimo y robusto de operación, obteniendo un entorno gráfico ligero e inmune a las rayas de corrupción de pantalla sin importar el zoom o los glifos que uses.
