@@ -35,7 +35,7 @@ bash <(curl -sL https://raw.githubusercontent.com/NeTenebraes/Intel-Legacy-Buffe
 
 ### 1. Reconfiguración del Servidor Gráfico X11
 El script genera el archivo `/etc/X11/xorg.conf.d/20-intel.conf` e inyecta directivas estrictas de hardware:
-* `Option "AccelMethod" "uxa"`: Sustituye el método SNA por **UXA** (*Unified X Acceleration*). No intenta adivinar texturas dinámicas en la memoria intermedia, garantizando un redibujado de fuentes e interfaces limpio. Es un método de aceleración más antiguo pero infinitamente más predecible con los píxeles. No intenta adivinar texturas en la memoria intermedia.
+* `Option "AccelMethod" "sna"`: Habilita explicitamente SNA (SandyBridge New Acceleration). A diferencia del antiguo UXA, SNA es una arquitectura inteligente que balancea la carga de renderizado entre la CPU y la GPU en tiempo real. Al utilizarse en conjunto con la pila Mesa Amber, se eliminan las regresiones de memoria, permitiendo una fluidez superior en el movimiento de ventanas, scroll de navegación y animaciones de escritorio sin sacrificar la estabilidad.
 
 * `Option "DRI" "2"`: Fuerza el uso de *Direct Rendering Infrastructure 2*. DRI2 gestiona la memoria de video de forma estrictamente síncrona, impidiendo que las aplicaciones manden comandos gráficos más rápido de lo que la GPU integrada puede procesar. DRI2 gestiona la memoria de video de forma síncrona y estricta, impidiendo que las aplicaciones manden comandos gráficos más rápido de lo que este hardware puede procesar.
 
