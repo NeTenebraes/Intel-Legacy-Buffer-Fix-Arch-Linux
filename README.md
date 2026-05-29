@@ -2,7 +2,7 @@
 
 Un script de automatización diseñado para corregir los fallos de renderizado (patrones de líneas verticales o corrupción de pantalla) en GPUs integradas Intel de legado (Testeado en Gen 2) bajo el servidor gráfico X11 y entornos ligeros (`bspwm`, `i3wm`).
 
-![Antes](https://github.com/NeTenebraes/Intel-Legacy-Buffer-Fix-Arch-Linux/blob/main/images/Antes.webp?raw=true).
+![Antes](https://github.com/NeTenebraes/Intel-Legacy-Buffer-Fix-Arch-Linux/blob/main/images/Antes.webp?raw=true)
 
 ## El Problema
 Las versiones modernas de la pila gráfica **Mesa** y el backend por defecto de **DRI3** sufren de desbordamientos de búfer de texturas al realizar operaciones rápidas de escalado o redibujado dinámico (como el zoom en terminales GPU-accelerated o renderizado de glifos complejos). Esto genera artefactos masivos de color en toda la pantalla (lineas verticales/horizontales).
