@@ -7,9 +7,10 @@ Este es un script de automatización diseñado para corregir los fallos de rende
 ## El Problema (Mesa 26.x y el driver Crocus)
 Las versiones modernas de la pila gráfica **Mesa** sustituyeron los controladores clásicos por el driver genérico **Crocus**. 
 
-También hay que tener en xuenta que el backend por defecto de **DRI3** sufre de desbordamientos de búfer de texturas al realizar operaciones rápidas de escalado o redibujado dinámico.
-
 Los cambios en este controlador introdujeron regresiones graves en la asignación de memoria intermedia (*ring buffer*) de los chipsets Sandy Bridge de Intel. Esto genera artefactos masivos de color en toda la pantalla (lineas verticales/horizontales).
+
+También hay que tener en cuenta que el backend por defecto de **DRI3** sufre de desbordamientos de búfer de texturas al realizar operaciones rápidas de escalado o redibujado dinámico luego de dichos cambios.
+
 
 ## La Solución
 Este script automatiza la reconfiguración del sistema aplicando varias capas de mitigación:
