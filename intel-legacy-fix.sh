@@ -25,6 +25,16 @@ SDDM_CONF_FILE="$SDDM_CONF_DIR/10-mesa-legacy.conf"
 
 timestamp=$(date +%Y%m%d-%H%M%S)
 
+enable_sddm_fix=0
+
+for arg in "$@"; do
+  case "$arg" in
+    --sddm)
+      enable_sddm_fix=1
+      ;;
+  esac
+done
+
 install_mesa_amber() {
   local mesa_pkgs=(mesa-amber lib32-mesa-amber)
   local conflict_pkgs=()
@@ -48,11 +58,7 @@ install_mesa_amber() {
 }
 
 apply_sddm_greeter_fix() {
-  local greeter_env="LIBGL_DRI3_DISABLE=1,MESA_LOADER_DRIVER_OVERRIDE=i965"
-
-  if [[ "${SDDM_FORCE_SOFTWARE:-0}" == "1" ]]; then
-    greeter_env+=",QT_QUICK_BACKEND=software"
-  fi
+  local greeter_env="LIBGL_DRI3_DISABLE=1,MESA_LOADER_DRIVER_OVERRIDE=i965,QT_QUICK_BACKEND=software,QT_OPENGL=software,LIBGL_ALWAYS_SOFTWARE=1,MESA_GL_VERSION_OVERRIDE=3.0,MESA_GLSL_VERSION_OVERRIDE=130"
 
   mkdir -p "$SDDM_CONF_DIR"
   cat > "$SDDM_CONF_FILE" <<EOF
@@ -110,7 +116,7 @@ MESA_LOADER_DRIVER_OVERRIDE=i965
 LIBGL_DRI3_DISABLE=1
 EOF
 
-if [[ "${ENABLE_SDDM_FIX:-0}" == "1" ]]; then
+if [[ "$enable_sddm_fix" == "1" ]]; then
   apply_sddm_greeter_fix
 fi
 

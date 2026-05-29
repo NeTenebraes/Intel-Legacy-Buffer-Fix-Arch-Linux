@@ -60,18 +60,12 @@ El script detecta y automatiza la transición mediante pacman:
 
 ### 4. Fix opcional para SDDM
 
-Algunas instalaciones muestran un flash blanco al cargar el greeter. Para mitigarlo, el script puede fijar variables de entorno del greeter de SDDM y forzar DRI2 en el login.
+Algunas instalaciones muestran un flash al cargar el greeter. Para mitigarlo, el script puede fijar variables de entorno del greeter de SDDM y forzar renderizado software solo en el login.
 
 Activación:
 
 ```bash
-ENABLE_SDDM_FIX=1 sudo bash intel-legacy-fix.sh
-```
-
-Si el flash persiste con temas QML/OpenGL, puedes forzar renderizado software del greeter:
-
-```bash
-ENABLE_SDDM_FIX=1 SDDM_FORCE_SOFTWARE=1 sudo bash intel-legacy-fix.sh
+sudo bash intel-legacy-fix.sh --sddm
 ```
 
 ## En resumen
