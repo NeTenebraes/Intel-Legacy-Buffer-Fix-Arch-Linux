@@ -9,10 +9,11 @@ Las versiones modernas de la pila gráfica **Mesa** y el backend por defecto de 
 
 ## La Solución
 Este script automatiza la reconfiguración del sistema aplicando tres capas de mitigación:
-1. Fuerza el uso de la arquitectura de aceleración **UXA** y degrada el pipeline gráfico a **DRI2** seguro.
-2. Configura variables de entorno críticas en `environment.d` para bloquear llamadas DRI3 en aplicaciones Qt/Electron.
-3. Reemplaza la pila de drivers principal de Mesa con los paquetes oficiales `mesa-amber` (los cuales retienen el código de hardware legacy estable).
-4. Crea un respaldo de tu configuración antigüa de xorg.
+1. Instala y reemplaza de forma automática los paquetes necesarios. 
+2. Fuerza el uso de la arquitectura de aceleración **UXA** y degrada el pipeline gráfico a **DRI2** seguro.
+3. Configura variables de entorno críticas en `environment.d` para bloquear llamadas DRI3 en aplicaciones Qt/Electron.
+4. Reemplaza la pila de drivers principal de Mesa con los paquetes oficiales `mesa-amber` (los cuales retienen el código de hardware legacy estable).
+5. Crea un respaldo de tu configuración antigüa de xorg.
 
 ## Uso
 Ejecuta el siguiente comando en tu terminal para aplicar el parche automáticamente:
