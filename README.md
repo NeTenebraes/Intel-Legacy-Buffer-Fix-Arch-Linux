@@ -25,7 +25,7 @@ curl -sL https://raw.githubusercontent.com/NeTenebraes/Intel-Legacy-Buffer-Fix-A
 ## ¿Qué hace este script?
 ### 1. Degradación Controlada del Pipeline Gráfico (Xorg)
 
-Por defecto, los entornos Linux modernos intentan usar DRI3 (Direct Rendering Infrastructure 3) y el método de aceleración SNA. En hardware antiguo, **esto es una bomba de tiempo**. Cuando cambias el tamaño de una ventana, haces zoom en terminales renderizadas por GPU o cargas iconos pesados, la GPU no procesa las texturas a tiempo, el búfer de video se desalinea y se pinta la una "persiana" de rayas en tu pantalla.
+Por defecto, los entornos Linux modernos intentan usar DRI3 (Direct Rendering Infrastructure 3) y el método de aceleración SNA. En hardware antiguo, **esto es una bomba de tiempo**. Cuando cambias el tamaño de una ventana, haces zoom en terminales renderizadas por GPU o cargas iconos pesados, la GPU no procesa las texturas a tiempo, el búfer de video se desalinea y se pinta una "persiana" de rayas en tu pantalla.
 
 El script busca solucionar esto creando el archivo `/etc/X11/xorg.conf.d/20-intel.conf` e inyectando la siguiente configuración:  
 
