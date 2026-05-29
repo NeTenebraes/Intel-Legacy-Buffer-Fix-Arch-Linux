@@ -9,13 +9,11 @@ Las versiones modernas de la pila gráfica **Mesa** sustituyeron los controlador
 
 Los cambios en este controlador introdujeron regresiones graves en la asignación de memoria intermedia (*ring buffer*) de los chipsets Sandy Bridge de Intel. Esto genera artefactos masivos de color (lineas verticales/horizontales) en algunas secciones de la pantalla.
 
-También hay que tener en cuenta que el backend por defecto de **DRI3** está sufriendo de desbordamientos de búfer de texturas al realizar operaciones rápidas de escalado o redibujado dinámico luego de dichos cambios.
-
 ## La Solución
 Este script automatiza la reconfiguración del sistema aplicando varias capas de mitigación:
 1. **Instalación de Drivers DDX Dedicados:** Asegura la presencia de `xf86-video-intel`, un componente que las instalaciones limpias de Arch suelen omitir y cuya ausencia rompe el arranque de Xorg.
 2. **Reemplazo del Motor Gráfico:** Remueve de forma segura la pila de Mesa moderna y la sustituye por `mesa-amber`, el fork oficial que conserva intacto el código de hardware heredado estable (`i965`).
-3. **Degradación Controlada a UXA y DRI2:** Fuerza al servidor X11 a gestionar los píxeles mediante un pipeline síncrono y predecible, eliminando por los desbordamientos de búfer.
+3. **Inyección de Aceleración Nativa (SNA)**: En lugar de forzar el método UXA (más lento), el script habilita SNA (SandyBridge New Acceleration) en conjunto con el protocolo DRI3 y la directiva TearFree. Al estar respaldado por Mesa Amber, este entorno elimina los desbordamientos de memoria intermedia, desbloqueando la máxima fluidez y velocidad del chip sin riesgo de corrupción.
 4. **Parche de Renderizado para SDDM (Opcional):** Aísla el gestor de inicio de sesión obligándolo a renderizar por software (CPU) para evitar congelamientos en el login antes de cargar tu entorno gráfico.
 5. Crea un respaldo de tu configuración antigüa de xorg.
 
@@ -31,38 +29,30 @@ curl -sL https://raw.githubusercontent.com/NeTenebraes/Intel-Legacy-Buffer-Fix-A
 bash <(curl -sL https://raw.githubusercontent.com/NeTenebraes/Intel-Legacy-Buffer-Fix-Arch-Linux/main/intel-legacy-fix.sh) --sddm
 ```
 
-## Detalles Técnicos: ¿Que hace este script?
+## Detalles Técnicos: ¿Qué hace este script?
 
 ### 1. Reconfiguración del Servidor Gráfico X11
-El script genera el archivo `/etc/X11/xorg.conf.d/20-intel.conf` e inyecta directivas estrictas de hardware:
-* `Option "AccelMethod" "sna"`: Habilita explicitamente SNA (SandyBridge New Acceleration). A diferencia del antiguo UXA, SNA es una arquitectura inteligente que balancea la carga de renderizado entre la CPU y la GPU en tiempo real. Al utilizarse en conjunto con la pila Mesa Amber, se eliminan las regresiones de memoria, permitiendo una fluidez superior en el movimiento de ventanas, scroll de navegación y animaciones de escritorio sin sacrificar la estabilidad.
-
-* `Option "DRI" "2"`: Fuerza el uso de *Direct Rendering Infrastructure 2*. DRI2 gestiona la memoria de video de forma estrictamente síncrona, impidiendo que las aplicaciones manden comandos gráficos más rápido de lo que la GPU integrada puede procesar. DRI2 gestiona la memoria de video de forma síncrona y estricta, impidiendo que las aplicaciones manden comandos gráficos más rápido de lo que este hardware puede procesar.
-
-* `Option "TearFree" "true"`: Habilita el doble búfer nativo por hardware para erradicar el desgarro de pantalla (*tearing*) al hacer scroll.
+El script genera el archivo `/etc/X11/xorg.conf.d/20-intel.conf` e inyecta directivas de hardware para optimizar el rendimiento en chipsets Sandy Bridge:
+* **`Option "AccelMethod" "sna"`**: Habilita la arquitectura *SandyBridge New Acceleration*. Al combinarse con la pila Mesa Amber, SNA balancea de forma inteligente la carga entre CPU y GPU, permitiendo una fluidez superior en animaciones y scroll de navegación sin riesgo de artefactos.
+* **`Option "DRI" "3"`**: Habilita *Direct Rendering Infrastructure 3*. Al utilizarse sobre una base estable como Mesa Amber, este protocolo permite una comunicación de memoria más eficiente y de baja latencia entre las aplicaciones y la GPU, maximizando el rendimiento sin las inestabilidades previas.
+* **`Option "TearFree" "true"`**: Activa el doble búfer nativo por hardware, eliminando por completo el desgarro de pantalla (*tearing*) durante el redibujado dinámico.
 
 ### 2. Aislamiento de Variables de Entorno (`environment.d`)
-Librerías modernas basadas en Qt o entornos Electron (como VS Code o Discord) suelen saltarse las reglas globales de Xorg. El script mitiga esto creando `/etc/environment.d/99-mesa-legacy.conf`:
-* `LIBGL_DRI3_DISABLE=1`: Desactiva el paso de búferes vía DRI3 a nivel de librerías cliente OpenGL, forzando el canal seguro DRI2.
-* `MESA_LOADER_DRIVER_OVERRIDE=i965`: Le ordena de forma explícita al cargador de Mesa ignorar por completo el controlador genérico moderno (`crocus`) y levantar exclusivamente el driver clásico de Intel.
+Crea el archivo `/etc/environment.d/99-mesa-legacy.conf` para asegurar que librerías modernas (Qt o entornos Electron como VS Code) respeten la configuración global del sistema:
+* **`LIBGL_DRI3_DISABLE=0`**: Permite el uso de DRI3 a nivel de librerías cliente, aprovechando la mejora de rendimiento en el intercambio de búferes de video.
+* **`MESA_LOADER_DRIVER_OVERRIDE=i965`**: Ordena explícitamente al cargador de Mesa ignorar el controlador genérico moderno (`crocus`) y utilizar exclusivamente el driver clásico de Intel.
 
-### 3. Gestión de Conflictos en Paquetes
-La función interna del script detecta de forma automática si el paquete `mesa` estándar está presente, aplicando un reemplazo agresivo controlado (`pacman -Rdd`) para evitar que el gestor de paquetes de Arch aborte por conflictos de archivos gráficos compartidos, inyectando inmediatamente la pila Amber estab
-le.
+### 3. Gestión de Paquetes y Conflictos
+Implementa una sustitución agresiva pero controlada de los controladores gráficos para evitar errores en el gestor de paquetes de Arch Linux:
+* **Reemplazo con `pacman -Rdd`**: Detecta y remueve la pila de Mesa estándar sin romper dependencias críticas, inyectando inmediatamente `mesa-amber` y `lib32-mesa-amber`.
+* **Restauración del código nativo**: Al instalar la rama Amber, se recupera el código fuente original diseñado para hardware legacy, permitiendo que la GPU vuelva a operar en su arquitectura estable a nivel de kernel.
 
-- **Descarga e instala mesa-amber y lib32-mesa-amber**: Este es un repositorio oficial y mantenido de Mesa que conserva intacto el código fuente clásico y nativo para hardware legacy de Intel.
+### 4. Mitigación para el Gestor de Accesos (Parche SDDM)
+Al usar la bandera `--sddm`, el script genera `/etc/sddm.conf.d/10-mesa-legacy.conf` para aislar el entorno del greeter (Qt Quick / QML) y evitar congelamientos en el login:
+* **Renderizado por Software**: Fuerza a la CPU (`QT_QUICK_BACKEND=software` y `LIBGL_ALWAYS_SOFTWARE=1`) a dibujar la interfaz de inicio de sesión de manera plana, evitando llamadas OpenGL modernas que el hardware Sandy Bridge no puede procesar antes de iniciar la sesión.
+* **Emulación de Perfiles**: Utiliza overrides de versión de GL y GLSL para engañar al subsistema gráfico de SDDM, previniendo cuelgues durante el proceso de autenticación.
 
-- **Reemplazo de la pila**: Al instalarlo, reemplaza la pila de Mesa moderna, asegurando que tu GPU vuelva a hablar en su "idioma nativo" a nivel de kernel.
-
-### 4. Mitigación de Fallos en el Gestor de Accesos (SDDM Greeter Parche)
-La pantalla de inicio de sesión de SDDM utiliza por defecto un motor de renderizado llamado **Qt Quick / QML**, el cual exige llamadas OpenGL modernas y perfiles de sombreadores que causan parpadeos (*flashes*), congelamientos parciales o retrasos en el arranque de chipsets Sandy Bridge antes de cargar el entorno de usuario.
-
-Al invocar el script con la bandera `--sddm`, se genera el archivo de anulación `/etc/sddm.conf.d/10-mesa-legacy.conf` aplicando un aislamiento estricto al entorno del greeter:
-* `QT_QUICK_BACKEND=software` y `QT_OPENGL=software`: Ordenan al gestor gráfico de Qt ignorar la GPU en durante la pantalla de login, forzando a la CPU a dibujar la interfaz de manera plana y segura.
-* `LIBGL_ALWAYS_SOFTWARE=1`: Funciona como un seguro adicional de bajo nivel que bloquea cualquier intento de inicialización 3D acelerada por parte de la librería GL antes de que se inicie la sesión real de Xorg.
-* `MESA_GL_VERSION_OVERRIDE=3.0` y `MESA_GLSL_VERSION_OVERRIDE=130`: Engañan al subsistema gráfico de SDDM emulando un perfil plano heredado compatible, previniendo los cuelgues del proceso de autenticación.
-
-> **Nota:** Este parche afecta única y exclusivamente a la pantalla de login de SDDM. Una vez introducidas las credenciales de usuario, las variables se destruyen y el control pasa al servidor X11 normal, donde tu entorno aprovechará la aceleración 2D/3D real por hardware optimizada mediante UXA y Mesa Amber.
+> **Nota:** Estas restricciones de software se aplican exclusivamente a la pantalla de login. Una vez iniciada la sesión, el control total regresa al servidor X11 con aceleración real por hardware mediante SNA y Mesa Amber.
 
 ## En resumen
 
