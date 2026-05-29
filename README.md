@@ -1,6 +1,6 @@
 # Intel Legacy Buffer Fix (Arch Linux)
 
-Un script de automatización diseñado para corregir los fallos de renderizado (patrones de líneas verticales o corrupción de pantalla) en GPUs integradas Intel de legado (Testeado en Gen 2) bajo el servidor gráfico X11 y entornos ligeros (`bspwm`, `i3wm`).
+Un script de automatización diseñado para corregir los fallos de renderizado (patrones de líneas verticales o corrupción de pantalla) en GPUs integradas Intel de legado (Testeado en Intel Gen 6 / Sandy Bridge / HD 2000). bajo el servidor gráfico X11 y entornos ligeros (`bspwm`, `i3wm`).
 
 ![Antes](https://github.com/NeTenebraes/Intel-Legacy-Buffer-Fix-Arch-Linux/blob/main/images/Antes.webp?raw=true)
 
@@ -20,6 +20,10 @@ Ejecuta el siguiente comando en tu terminal para aplicar el parche automáticame
 
 ```bash
 curl -sL https://raw.githubusercontent.com/NeTenebraes/Intel-Legacy-Buffer-Fix-Arch-Linux/main/intel-legacy-fix.sh | sudo bash
+```
+
+```bash
+bash <(curl -sL https://raw.githubusercontent.com/NeTenebraes/Intel-Legacy-Buffer-Fix-Arch-Linux/main/intel-legacy-fix.sh) --sddm
 ```
 
 ## ¿Qué hace este script?
