@@ -11,4 +11,7 @@ Este script automatiza la reconfiguración del sistema aplicando tres capas de m
 2. Configura variables de entorno críticas en `environment.d` para bloquear llamadas DRI3 en aplicaciones Qt/Electron.
 3. Reemplaza la pila de drivers principal de Mesa con los paquetes oficiales **Mesa Amber** (`mesa-amber`), los cuales retienen el código de hardware legacy estable.
 
-## Uso
+## Us
+```bash
+curl -sL https://raw.githubusercontent.com/NeTenebraes/Intel-Legacy-Buffer-Fix-Arch-Linux/main/intel-legacy-fix.sh | sudo bash
+```
