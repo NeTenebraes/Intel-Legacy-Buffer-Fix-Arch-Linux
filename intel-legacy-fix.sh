@@ -87,17 +87,19 @@ fi
 # ------------------------------------------------------------------------------
 # CONFIGURACIÓN DE XORG (SERVIDOR GRÁFICO X11)
 # ------------------------------------------------------------------------------
-# - AccelMethod "uxa": Reemplaza SNA por la arquitectura de aceleración clásica (Unified
-#   X Acceleration). Previene desbordamientos de búfer en renderizado dinámico de fuentes.
-# - TearFree "true": Habilita el control de sincronización vertical nativo por hardware.
-# - DRI "2": Fuerza el uso de Direct Rendering Infrastructure 2, evitando las llamadas
-#   asíncronas conflictivas de DRI3 en chipsets antiguos.
+# - AccelMethod "sna": Habilita SandyBridge New Acceleration. Es el método más 
+#   eficiente para Intel Gen 6, optimizando el balanceo de carga entre CPU y GPU.
+#   Se utiliza junto a mesa-amber para garantizar estabilidad y máxima fluidez.
+# - TearFree "true": Habilita el doble búfer nativo para eliminar el desgarro 
+#   de pantalla (tearing) durante el scroll y reproducción de video.
+# - DRI "2": Fuerza el uso de Direct Rendering Infrastructure 2. Mantiene una 
+#   sincronización estricta de la memoria de video, ideal para hardware legacy.
 # ------------------------------------------------------------------------------
 cat > "$XORG_CONF_FILE" <<'EOF'
 Section "Device"
     Identifier "Intel Graphics"
     Driver "intel"
-    Option "AccelMethod" "uxa"
+    Option "AccelMethod" "sna"
     Option "TearFree" "true"
     Option "DRI" "2"
 EndSection
