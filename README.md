@@ -52,11 +52,27 @@ Para evitar esto, el script genera el archivo `/etc/environment.d/99-mesa-legacy
 
 Esta es la parte más crítica del script. Las versiones actuales de Mesa intentan emular tu GPU de legado con drivers modernos, lo cual genera fallos matemáticos fatales en la memoria de video.
 
-El script detecta automatiza la transición mediante pacman:
+El script detecta y automatiza la transición mediante pacman:
 
 - **Descarga e instala mesa-amber y lib32-mesa-amber**: Este es un repositorio oficial y mantenido de Mesa que conserva intacto el código fuente clásico y nativo para hardware legacy de Intel.
 
 - **Reemplazo de la pila**: Al instalarlo, reemplaza la pila de Mesa moderna, asegurando que tu GPU vuelva a hablar en su "idioma nativo" a nivel de kernel.
+
+### 4. Fix opcional para SDDM
+
+Algunas instalaciones muestran un flash blanco al cargar el greeter. Para mitigarlo, el script puede fijar variables de entorno del greeter de SDDM y forzar DRI2 en el login.
+
+Activación:
+
+```bash
+ENABLE_SDDM_FIX=1 sudo bash intel-legacy-fix.sh
+```
+
+Si el flash persiste con temas QML/OpenGL, puedes forzar renderizado software del greeter:
+
+```bash
+ENABLE_SDDM_FIX=1 SDDM_FORCE_SOFTWARE=1 sudo bash intel-legacy-fix.sh
+```
 
 ## En resumen
 

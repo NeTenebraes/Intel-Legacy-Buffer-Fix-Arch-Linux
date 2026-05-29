@@ -20,8 +20,46 @@ XORG_CONF_DIR="/etc/X11/xorg.conf.d"
 XORG_CONF_FILE="$XORG_CONF_DIR/20-intel.conf"
 ENV_DIR="/etc/environment.d"
 ENV_FILE="$ENV_DIR/99-mesa-legacy.conf"
+SDDM_CONF_DIR="/etc/sddm.conf.d"
+SDDM_CONF_FILE="$SDDM_CONF_DIR/10-mesa-legacy.conf"
 
 timestamp=$(date +%Y%m%d-%H%M%S)
+
+install_mesa_amber() {
+  local mesa_pkgs=(mesa-amber lib32-mesa-amber)
+  local conflict_pkgs=()
+
+  if pacman -Q mesa >/dev/null 2>&1; then
+    conflict_pkgs+=(mesa)
+  fi
+
+  if pacman -Q lib32-mesa >/dev/null 2>&1; then
+    conflict_pkgs+=(lib32-mesa)
+  fi
+
+  if ! pacman -S --noconfirm --needed "${mesa_pkgs[@]}"; then
+    if ((${#conflict_pkgs[@]})); then
+      pacman -Rdd --noconfirm "${conflict_pkgs[@]}"
+      pacman -S --noconfirm --needed "${mesa_pkgs[@]}"
+    else
+      return 1
+    fi
+  fi
+}
+
+apply_sddm_greeter_fix() {
+  local greeter_env="LIBGL_DRI3_DISABLE=1,MESA_LOADER_DRIVER_OVERRIDE=i965"
+
+  if [[ "${SDDM_FORCE_SOFTWARE:-0}" == "1" ]]; then
+    greeter_env+=",QT_QUICK_BACKEND=software"
+  fi
+
+  mkdir -p "$SDDM_CONF_DIR"
+  cat > "$SDDM_CONF_FILE" <<EOF
+[General]
+GreeterEnvironment=$greeter_env
+EOF
+}
 
 # ------------------------------------------------------------------------------
 # GESTIÓN DE DEPENDENCIAS: MESA AMBER (DRIVERS DE GRADUADOS / LEGACY)
@@ -29,13 +67,8 @@ timestamp=$(date +%Y%m%d-%H%M%S)
 # El driver principal de Mesa removió el soporte nativo de hardware clásico.
 # Es mandatorio instalar el fork oficial 'mesa-amber' para recuperar el soporte 3D real.
 # ------------------------------------------------------------------------------
-if ! pacman -Q mesa-amber >/dev/null 2>&1; then
-  pacman -S --noconfirm mesa-amber
-fi
-
-if ! pacman -Q lib32-mesa-amber >/dev/null 2>&1; then
-  pacman -S --noconfirm lib32-mesa-amber
-fi
+pacman -S --needed --noconfirm xf86-video-intel
+install_mesa_amber
 
 # Asegurar la existencia de los directorios del sistema de archivos
 mkdir -p "$XORG_CONF_DIR" "$ENV_DIR"
@@ -76,5 +109,9 @@ cat > "$ENV_FILE" <<'EOF'
 MESA_LOADER_DRIVER_OVERRIDE=i965
 LIBGL_DRI3_DISABLE=1
 EOF
+
+if [[ "${ENABLE_SDDM_FIX:-0}" == "1" ]]; then
+  apply_sddm_greeter_fix
+fi
 
 echo "Done. Log out and log in again, restart X or JUST REBOOT NOW"
