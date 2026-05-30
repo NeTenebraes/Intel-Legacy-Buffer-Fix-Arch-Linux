@@ -7,6 +7,20 @@
 # AUTOR: netenebrae
 # ==============================================================================
 
+# ------------------------------------------------------------------------------
+# OBSERVACIONES: MESA AMBER + MODESETTING (SIN VARIABLES)
+# ------------------------------------------------------------------------------
+# Esta configuración es el resultado de pruebas directas en el hardware,
+# demostrando ser la combinación con mayor estabilidad y rendimiento. FASE DE PRUEBAS, AUN NO ESTÁ APLICADA AL SCRIPT.
+#
+# REQUISITOS Y COMPORTAMIENTO:
+# 1. Gráficos base: Requiere 'mesa-amber' y 'lib32-mesa-amber' instalados.
+# 2. Driver Xorg: Utiliza 'modesetting' (nativo de Xorg), eliminando por completo el paquete 'xf86-video-intel' para evitar artefactos en la GPU.
+# 3. Sincronización: Activa 'DRI 3' y 'TearFree' para eliminar el desgarro visual.
+# 4. Simplificación: No requiere variables de entorno en /etc/environment.d/ ni configuraciones personalizadas en /etc/sddm.conf.d/.
+# ------------------------------------------------------------------------------
+
+
 set -euo pipefail
 
 # Verificación de privilegios de ejecución (Requerido para modificar configuraciones del sistema)
