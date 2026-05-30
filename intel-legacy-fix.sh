@@ -113,6 +113,7 @@ EOF
 # - LIBGL_DRI3_DISABLE=1: Desactiva por completo el paso de búferes vía DRI3 a nivel de
 #   librerías cliente OpenGL (esencial para aplicaciones basadas en Qt/Electron).
 # ------------------------------------------------------------------------------
+# Testing DIR Disable. Default = 0
 cat > "$ENV_FILE" <<'EOF'
 MESA_LOADER_DRIVER_OVERRIDE=i965
 LIBGL_DRI3_DISABLE=1
