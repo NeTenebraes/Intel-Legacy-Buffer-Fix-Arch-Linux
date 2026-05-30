@@ -24,7 +24,7 @@ Este script automatiza la reconfiguración del sistema aplicando varias capas de
 4. **Parche de Renderizado para SDDM (Opcional):** Aísla el gestor de inicio de sesión obligándolo a renderizar por software (CPU) para evitar congelamientos en el login antes de cargar tu entorno gráfico.
 5. Crea un respaldo de tu configuración antigüa de xorg.
 
-> En si, lo mas importante es volver a utilizar `xf86-video-intel` junto con `mesa-amber` en la directiva `i965`. Las demás configuraciones son para indicar de forma explícita los parámetros a usar.
+> En si, lo mas importante es volver a utilizar `xf86-video-intel` junto con `mesa-amber` en la directiva `intel`. Las demás configuraciones son para indicar de forma explícita los parámetros a usar.
 
 ## Uso
 Ejecuta el siguiente comando en tu terminal para aplicar el parche automáticamente:
