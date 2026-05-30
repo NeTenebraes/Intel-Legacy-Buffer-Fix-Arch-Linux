@@ -101,7 +101,7 @@ Section "Device"
     Driver "intel"
     Option "AccelMethod" "sna"
     Option "TearFree" "true"
-    Option "DRI" "2"
+    Option "DRI" "3"
 EndSection
 EOF
 
