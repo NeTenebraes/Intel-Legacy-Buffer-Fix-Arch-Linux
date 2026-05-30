@@ -5,9 +5,9 @@ Este es un script de automatización diseñado para corregir los fallos de rende
 > Testeado en Intel Gen 6 / Sandy Bridge / HD 2000 bajo el servidor gráfico X11 en el entorno `bspwm`.
 
 ## El Problema (Mesa 26.x y el driver Crocus)
-Las versiones modernas de la pila gráfica **Mesa** sustituyeron los controladores clásicos por el driver genérico **Crocus**. 
+Las versiones modernas de la pila gráfica **Mesa** sustituyeron los controladores clásicos por el driver **Crocus**. 
 
-Los cambios en este controlador introdujeron regresiones graves en la asignación de memoria intermedia (*ring buffer*) de los chipsets Sandy Bridge de Intel. Esto genera artefactos masivos de color (lineas verticales/horizontales) en algunas secciones de la pantalla.
+Los cambios en este controlador introdujeron regresiones graves en la asignación de memoria intermedia (*ring buffer*) de los chipsets Sandy Bridge de Intel. Esto genera artefactos masivos (lineas verticales/horizontales) en algunas secciones de la pantalla.
 
 ## La Solución
 Este script automatiza la reconfiguración del sistema aplicando varias capas de mitigación:
@@ -16,6 +16,8 @@ Este script automatiza la reconfiguración del sistema aplicando varias capas de
 3. **Inyección de Aceleración Nativa (SNA)**: En lugar de forzar el método UXA (más lento), el script habilita SNA (SandyBridge New Acceleration) en conjunto con el protocolo DRI3 y la directiva TearFree. Al estar respaldado por Mesa Amber, este entorno elimina los desbordamientos de memoria intermedia, desbloqueando la máxima fluidez y velocidad del chip sin riesgo de corrupción.
 4. **Parche de Renderizado para SDDM (Opcional):** Aísla el gestor de inicio de sesión obligándolo a renderizar por software (CPU) para evitar congelamientos en el login antes de cargar tu entorno gráfico.
 5. Crea un respaldo de tu configuración antigüa de xorg.
+
+> En si, lo mas importante es volver a utilizar `xf86-video-intel` junto con `mesa-amber` en la directiva `i965`. Las demás configuraciones son para indicar de forma explícita los parámetros a usar.
 
 ## Uso
 Ejecuta el siguiente comando en tu terminal para aplicar el parche automáticamente:
