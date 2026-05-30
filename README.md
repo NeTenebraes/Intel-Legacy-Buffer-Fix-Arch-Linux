@@ -2,7 +2,14 @@
 
 Este es un script de automatización diseñado para corregir los fallos de renderizado (patrones de líneas verticales o corrupción de pantalla) en GPUs integradas de legado Intel en sistemas Archlinux.
 ![Antes](https://github.com/NeTenebraes/Intel-Legacy-Buffer-Fix-Arch-Linux/blob/main/images/Antes.webp?raw=true)
-> Testeado en Intel Gen 6 / Sandy Bridge / HD 2000 bajo el servidor gráfico X11 en el entorno `bspwm`.
+
+
+> [!WARNING]
+> Este script esta en fase EXPERIMENTAL.
+> - Actualmente se están haciendo pruebas para no tener que usar configuración obsoleta.
+> - Esta configuración es exclusiva para hardware Intel Legacy con Mesa Amber.
+> - Testeado en Intel Gen 6 / Sandy Bridge / HD 2000 bajo el servidor gráfico X11 en el entorno `bspwm`.
+
 
 ## El Problema (Mesa 26.x y el driver Crocus)
 Las versiones modernas de la pila gráfica **Mesa** sustituyeron los controladores clásicos por el driver **Crocus**. 
@@ -11,7 +18,7 @@ Los cambios en este controlador introdujeron regresiones graves en la asignació
 
 ## La Solución
 Este script automatiza la reconfiguración del sistema aplicando varias capas de mitigación:
-1. **Instalación de Drivers DDX Dedicados:** Asegura la presencia de `xf86-video-intel`, un componente que las instalaciones limpias de Arch suelen omitir y cuya ausencia rompe el arranque de Xorg.
+1. **Instalación de Drivers DDX Dedicados:** Asegura la presencia de `xf86-video-intel`, un componente que las instalaciones limpias de Arch suelen omitir y cuya ausencia rompe el arranque de Xorg con la directiva "intel".
 2. **Reemplazo del Motor Gráfico:** Remueve de forma segura la pila de Mesa moderna y la sustituye por `mesa-amber`, el fork oficial que conserva intacto el código de hardware heredado estable (`i965`).
 3. **Inyección de Aceleración Nativa (SNA)**: En lugar de forzar el método UXA (más lento), el script habilita SNA (SandyBridge New Acceleration) en conjunto con el protocolo DRI3 y la directiva TearFree. Al estar respaldado por Mesa Amber, este entorno elimina los desbordamientos de memoria intermedia, desbloqueando la máxima fluidez y velocidad del chip sin riesgo de corrupción.
 4. **Parche de Renderizado para SDDM (Opcional):** Aísla el gestor de inicio de sesión obligándolo a renderizar por software (CPU) para evitar congelamientos en el login antes de cargar tu entorno gráfico.
