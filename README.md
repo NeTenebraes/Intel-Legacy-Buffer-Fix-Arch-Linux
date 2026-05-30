@@ -41,17 +41,17 @@ El script genera el archivo `/etc/X11/xorg.conf.d/20-intel.conf` e inyecta direc
 
 ### 2. Aislamiento de Variables de Entorno (`environment.d`)
 Crea el archivo `/etc/environment.d/99-mesa-legacy.conf` para asegurar que librerías modernas (Qt o entornos Electron como VS Code) respeten la configuración global del sistema:
-* **`LIBGL_DRI3_DISABLE=0`**: Permite el uso de DRI3 a nivel de librerías cliente, aprovechando la mejora de rendimiento en el intercambio de búferes de video.
 * **`MESA_LOADER_DRIVER_OVERRIDE=i965`**: Ordena explícitamente al cargador de Mesa ignorar el controlador genérico moderno (`crocus`) y utilizar exclusivamente el driver clásico de Intel.
+* **`LIBGL_DRI3_DISABLE=0`**: Permite el uso de DRI3 a nivel de librerías cliente, aprovechando la mejora de rendimiento en el intercambio de búferes de video.
 
 ### 3. Gestión de Paquetes y Conflictos
 Implementa una sustitución agresiva pero controlada de los controladores gráficos para evitar errores en el gestor de paquetes de Arch Linux:
 * **Reemplazo con `pacman -Rdd`**: Detecta y remueve la pila de Mesa estándar sin romper dependencias críticas, inyectando inmediatamente `mesa-amber` y `lib32-mesa-amber`.
 * **Restauración del código nativo**: Al instalar la rama Amber, se recupera el código fuente original diseñado para hardware legacy, permitiendo que la GPU vuelva a operar en su arquitectura estable a nivel de kernel.
 
-### 4. Mitigación para el Gestor de Accesos (Parche SDDM)
+### 4. Mitigación para el Gestor de Accesos (Parche opcional para SDDM)
 Al usar la bandera `--sddm`, el script genera `/etc/sddm.conf.d/10-mesa-legacy.conf` para aislar el entorno del greeter (Qt Quick / QML) y evitar congelamientos en el login:
-* **Renderizado por Software**: Fuerza a la CPU (`QT_QUICK_BACKEND=software` y `LIBGL_ALWAYS_SOFTWARE=1`) a dibujar la interfaz de inicio de sesión de manera plana, evitando llamadas OpenGL modernas que el hardware Sandy Bridge no puede procesar antes de iniciar la sesión.
+* **Renderizado por Software**: Fuerza a la CPU (`QT_QUICK_BACKEND=software` y `LIBGL_ALWAYS_SOFTWARE=1`) a dibujar la interfaz de inicio de sesión de manera plana, evitando llamadas OpenGL modernas que el hardware Sandy Bridge tiene problemas para procesar antes de iniciar la sesión.
 * **Emulación de Perfiles**: Utiliza overrides de versión de GL y GLSL para engañar al subsistema gráfico de SDDM, previniendo cuelgues durante el proceso de autenticación.
 
 > **Nota:** Estas restricciones de software se aplican exclusivamente a la pantalla de login. Una vez iniciada la sesión, el control total regresa al servidor X11 con aceleración real por hardware mediante SNA y Mesa Amber.
