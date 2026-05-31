@@ -2,8 +2,7 @@
 # ==============================================================================
 # SCRIPT: intel-legacy-fix.sh
 # DESCRIPCIÓN: Corrige la corrupción del búfer de video (patrón de líneas verticales)
-#              en arquitecturas Intel Legacy mediante el downgrade controlado a DRI2,
-#              UXA y el backend clásico de Mesa (Mesa Amber).
+#              en arquitecturas Intel Legacy mediante el uso de mesa-amber.
 # AUTOR: netenebrae
 # ==============================================================================
 
@@ -18,7 +17,8 @@
 # 1. Gráficos base: Requiere 'mesa-amber' y 'lib32-mesa-amber' instalados.
 # 2. Driver Xorg: Utiliza 'modesetting' (nativo de Xorg), eliminando por completo el paquete xf86-video-intel.
 # 3. Sincronización: Activa 'DRI 3' y 'TearFree' para eliminar el desgarro visual.
-# 4. Simplificación: No requiere variables de entorno en /etc/environment.d/ ni configuraciones personalizadas en /etc/sddm.conf.d/.
+# 4. Simplificación: No requiere variables de entorno en /etc/environment.d/ 
+#    ni configuraciones personalizadas en /etc/sddm.conf.d/.
 # ------------------------------------------------------------------------------
 
 
@@ -42,6 +42,7 @@ timestamp=$(date +%Y%m%d-%H%M%S)
 
 enable_sddm_fix=0
 
+# Argumento que activa el fix opcional de sddm
 for arg in "$@"; do
   case "$arg" in
     --sddm)
@@ -50,6 +51,7 @@ for arg in "$@"; do
   esac
 done
 
+# Reemplaza los controladores de mesa por mesa-amber.
 install_mesa_amber() {
   local mesa_pkgs=(mesa-amber lib32-mesa-amber)
   local conflict_pkgs=()
@@ -72,6 +74,7 @@ install_mesa_amber() {
   fi
 }
 
+# Aplica la configuración del greeter SDDM.
 apply_sddm_greeter_fix() {
   local greeter_env="LIBGL_DRI3_DISABLE=1,MESA_LOADER_DRIVER_OVERRIDE=i965,QT_QUICK_BACKEND=software,QT_OPENGL=software,LIBGL_ALWAYS_SOFTWARE=1,MESA_GL_VERSION_OVERRIDE=3.0,MESA_GLSL_VERSION_OVERRIDE=130"
 
@@ -88,7 +91,9 @@ EOF
 # El driver principal de Mesa removió el soporte nativo de hardware clásico.
 # Es mandatorio instalar el fork oficial 'mesa-amber' para recuperar el soporte 3D real.
 # ------------------------------------------------------------------------------
-pacman -S --needed --noconfirm xf86-video-intel
+# La instalación de xf86 ha sido comentada por no considerarse necesaria al usar modesetting 
+# pacman -S --needed --noconfirm xf86-video-intel
+
 install_mesa_amber
 
 # Asegurar la existencia de los directorios del sistema de archivos
@@ -103,18 +108,20 @@ fi
 # CONFIGURACIÓN DE XORG (SERVIDOR GRÁFICO X11)
 # ------------------------------------------------------------------------------
 # - AccelMethod "sna": Habilita SandyBridge New Acceleration. Es el método más 
-#   eficiente para Intel Gen 6, optimizando el balanceo de carga entre CPU y GPU.
-#   Se utiliza junto a mesa-amber para garantizar estabilidad y máxima fluidez.
+#   eficiente para Intel Gen 6 si usas xf86, optimizando el balanceo de carga entre CPU y GPU.
+#   
 # - TearFree "true": Habilita el doble búfer nativo para eliminar el desgarro 
 #   de pantalla (tearing) durante el scroll y reproducción de video.
+#
 # - DRI "2": Fuerza el uso de Direct Rendering Infrastructure 2. Mantiene una 
 #   sincronización estricta de la memoria de video, ideal para hardware legacy.
+#   Se ha pasado a 3 ya que ha pasado las pruebas iniciales.
 # ------------------------------------------------------------------------------
 cat > "$XORG_CONF_FILE" <<'EOF'
 Section "Device"
     Identifier "Intel Graphics"
-    Driver "intel"
-    Option "AccelMethod" "sna"
+    Driver "modesetting"
+#    Option "AccelMethod" "sna"
     Option "TearFree" "true"
     Option "DRI" "3"
 EndSection
@@ -127,12 +134,12 @@ EOF
 #   de Intel dentro de la pila gráfica de Mesa, ignorando Crocus/Iris.
 # - LIBGL_DRI3_DISABLE=1: Desactiva por completo el paso de búferes vía DRI3 a nivel de
 #   librerías cliente OpenGL (esencial para aplicaciones basadas en Qt/Electron).
-# ------------------------------------------------------------------------------
-# Testing DIR Disable. Default = 0
-cat > "$ENV_FILE" <<'EOF'
-MESA_LOADER_DRIVER_OVERRIDE=i965
-LIBGL_DRI3_DISABLE=1
-EOF
+#   Se ha comentado esta sección ya qué no hay necesidad al haber pasaso las pruebas con modesetting 
+# -------------------------------------------------------------------------------
+# cat > "$ENV_FILE" <<'EOF'
+# MESA_LOADER_DRIVER_OVERRIDE=i965
+# LIBGL_DRI3_DISABLE=0
+# EOF
 
 if [[ "$enable_sddm_fix" == "1" ]]; then
   apply_sddm_greeter_fix
