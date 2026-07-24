@@ -2,7 +2,7 @@
 
 Este es un script de automatización diseñado para corregir los fallos de renderizado (patrones de líneas verticales o corrupción de pantalla) en GPUs integradas de legado Intel en sistemas Archlinux.
 
-> En español: Arregla las lineas de colores que aparecen en las terminal y algunas aplicaciones en CPUs Intel de 2da generación para sistemas operativos ArchLinux.
+> En español: Arregla las lineas de colores que aparecen en la terminal y algunas aplicaciones, afectando directamente a CPUs Intel de 2da generación en sistemas operativos ArchLinux.
 
 ![Antes](https://github.com/NeTenebraes/Intel-Legacy-Buffer-Fix-Arch-Linux/blob/main/images/Antes.webp?raw=true)
 
